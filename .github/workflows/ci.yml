@@ -13,6 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+     # Pull LFS files only if they are needed in this job
+    - name: Git LFS Pull
+      run: git lfs pull
+
     - name: Set up Python 3.x
       uses: actions/setup-python@v2
       with:
@@ -42,14 +46,20 @@ jobs:
       run: |
         pytest tests/
 
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master' && needs.build-and-test.result == 'success'
+    
+    steps:
+    - uses: actions/checkout@v2
 
-  # If your project includes a deployment step, add a new job here
-  # Example:
-  # deploy:
-  #   needs: build-and-test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - name: Deploy
-  #     run: |
-  #       # Your deployment commands
+    # Add the LFS pull step here only if your Docker build requires LFS files
+    - name: Git LFS Pull
+      run: git lfs pull
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t jawadarnob97/predictive-maintenance:latest .
+        echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        docker push jawadarnob97/predictive-maintenance:latest
