@@ -2,3 +2,4 @@
 
 CI/CD implementation
 wrokflow has been created
+training check

@@ -26,6 +26,17 @@ jobs:
    # - name: Lint with flake8
    #   run: |
    #     flake8 src/ tests/  # Adjust paths as needed
+   
+   # Add the model training step
+    - name: Train the Model
+      run: python src/main.py
+
+   # Add the model uploading step
+    - name: Upload Trained Model
+      uses: actions/upload-artifact@v2
+      with:
+        name: trained-model
+        path: trained_model.joblib
 
     - name: Run Tests
       run: |
